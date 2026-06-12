@@ -41,7 +41,7 @@ public class MyWebApp extends HttpServlet {
     private String readFileContent(String fileName) throws IOException {
         String fileContent = loadFile("/" + fileName);
 
-        Properties props = loadProperties("/values.properties");
+        Properties props = (Properties) getServletContext().getAttribute("contextProperties");
         
         String content = fileContent.replace("__FOO_BAR__", FOO_BAR);
         return replacePlaceholders(content, props);
@@ -53,13 +53,6 @@ public class MyWebApp extends HttpServlet {
         }
     }
 
-    private Properties loadProperties(String path) throws IOException {
-        Properties props = new Properties();
-        try (InputStream inputStream = getServletContext().getResourceAsStream(path)) {
-            props.load(inputStream);
-        }
-        return props;
-    }
 
     private String replacePlaceholders(String content, Properties props) {
         return Pattern.compile("\\$\\{([^}]+)\\}")
@@ -71,5 +64,14 @@ public class MyWebApp extends HttpServlet {
                     }
                     return val.replace("\"", "");
                 });
+    }
+
+    private Page createPage(String className) {
+
+        var pageClass = Class.forName(className);
+
+        Page page = pageClass.getDeclaredConstructor().newInstance();
+
+        page.getPageValues()
     }
 }
