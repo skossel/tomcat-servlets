@@ -6,10 +6,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.*;
+import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @WebServlet(name = "myWebApp", urlPatterns = {"/*"})
 public class MyWebApp extends HttpServlet {
+
+    private static final String FOO_BAR = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -18,7 +22,8 @@ public class MyWebApp extends HttpServlet {
         String fileName = getFileName(pathInfo);
 
         String content = readFileContent(fileName);
-        response.getWriter().println(content + " llb banking");
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(content);
     }
 
     private String getFileName(String pathInfo) {
@@ -26,15 +31,45 @@ public class MyWebApp extends HttpServlet {
             return pathInfo.substring(1) + ".yve";
         }
         String name = pathInfo.substring(1);
+/*
         String reversed = new StringBuilder(name).reverse().toString();
-        reversed += ".dso";
-        return reversed;
+*/
+        name += ".dso";
+        return name;
     }
 
     private String readFileContent(String fileName) throws IOException {
-        InputStream inputStream = getServletContext().getResourceAsStream("/" + fileName);
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            return reader.lines().collect(Collectors.joining("\n"));
+        String fileContent = loadFile("/" + fileName);
+
+        Properties props = loadProperties("/values.properties");
+        
+        String content = fileContent.replace("__FOO_BAR__", FOO_BAR);
+        return replacePlaceholders(content, props);
+    }
+
+    private String loadFile(String path) throws IOException {
+        try (InputStream inputStream = getServletContext().getResourceAsStream(path)) {
+            return new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining("\n"));
         }
+    }
+
+    private Properties loadProperties(String path) throws IOException {
+        Properties props = new Properties();
+        try (InputStream inputStream = getServletContext().getResourceAsStream(path)) {
+            props.load(inputStream);
+        }
+        return props;
+    }
+
+    private String replacePlaceholders(String content, Properties props) {
+        return Pattern.compile("\\$\\{([^}]+)\\}")
+                .matcher(content)
+                .replaceAll(match -> {
+                    String val = props.getProperty(match.group(1));
+                    if (val == null) {
+                        return "property not found";
+                    }
+                    return val.replace("\"", "");
+                });
     }
 }
