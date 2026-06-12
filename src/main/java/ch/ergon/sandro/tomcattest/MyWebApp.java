@@ -22,6 +22,9 @@ public class MyWebApp extends HttpServlet {
     }
 
     private String getFileName(String pathInfo) {
+        if (pathInfo != null && pathInfo.startsWith("/yves/")) {
+            return pathInfo.substring(1) + ".yve";
+        }
         String name = pathInfo.substring(1);
         String reversed = new StringBuilder(name).reverse().toString();
         reversed += ".dso";
