@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.*;
-import java.util.Properties;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -17,61 +17,64 @@ public class MyWebApp extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
-        System.out.println("Servlet MyWebApp was accessed from: " + request.getServletPath() + " with path info: " + pathInfo);
 
-        String fileName = getFileName(pathInfo);
-
-        String content = readFileContent(fileName);
-        response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().write(content);
-    }
-
-    private String getFileName(String pathInfo) {
-        if (pathInfo != null && pathInfo.startsWith("/yves/")) {
-            return pathInfo.substring(1) + ".yve";
+        String pageName = pathInfo.substring(1).split("/")[0];
+        Page page = createPage(pageName);
+        if (page == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Page class not found: " + pageName);
+            return;
         }
-        String name = pathInfo.substring(1);
-/*
-        String reversed = new StringBuilder(name).reverse().toString();
-*/
-        name += ".dso";
-        return name;
-    }
 
-    private String readFileContent(String fileName) throws IOException {
-        String fileContent = loadFile("/" + fileName);
+        String dsoPath = "/ch/ergon/sandro/tomcattest/pages/" + pageName + ".dso";
+        String content = loadFile(dsoPath);
+        Map<String, String> values = page.getPageValues();
+        String finalContent = replacePlaceholders(content, values);
+        if (finalContent == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Page content not found: " + dsoPath);
+            return;
+        }
+        finalContent = finalContent.replace("__FOO_BAR__", FOO_BAR);
 
-        Properties props = (Properties) getServletContext().getAttribute("contextProperties");
-        
-        String content = fileContent.replace("__FOO_BAR__", FOO_BAR);
-        return replacePlaceholders(content, props);
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(finalContent);
     }
 
     private String loadFile(String path) throws IOException {
-        try (InputStream inputStream = getServletContext().getResourceAsStream(path)) {
+        try (InputStream inputStream = getClass().getResourceAsStream(path)) {
+            if (inputStream == null) {
+                return null;
+            }
             return new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining("\n"));
         }
     }
 
-
-    private String replacePlaceholders(String content, Properties props) {
+    private String replacePlaceholders(String content, Map<String, String> values) {
+        if (content == null) {
+            return null;
+        }
         return Pattern.compile("\\$\\{([^}]+)\\}")
                 .matcher(content)
                 .replaceAll(match -> {
-                    String val = props.getProperty(match.group(1));
+                    String key = match.group(1);
+                    String val = values.get(key);
                     if (val == null) {
                         return "property not found";
                     }
-                    return val.replace("\"", "");
+                    return val;
                 });
     }
 
-    private Page createPage(String className) {
-
-        var pageClass = Class.forName(className);
-
-        Page page = pageClass.getDeclaredConstructor().newInstance();
-
-        page.getPageValues()
+    private Page createPage(String pageName) {
+        try {
+            String className = pageName.substring(0, 1).toUpperCase() + pageName.substring(1);
+            String fullClassName = "ch.ergon.sandro.tomcattest.pages." + className;
+            return (Page) Class
+                    .forName(fullClassName)
+                    .getDeclaredConstructor()
+                    .newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

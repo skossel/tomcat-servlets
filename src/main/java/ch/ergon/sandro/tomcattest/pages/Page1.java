@@ -8,10 +8,12 @@ public class Page1 implements Page {
 
     @Override
     public Map<String, String> getPageValues() {
-
-
-
-        return new ch.ergon.sandro.tomcattest.Page();
-
+        return Map.of(
+                "LLB", "Bank LLB AG",
+                "YVES", "Yves",
+                "SANDRO", "Sandro",
+                "apfel", "Apfel",
+                "birne", "Birne"
+        );
     }
 }

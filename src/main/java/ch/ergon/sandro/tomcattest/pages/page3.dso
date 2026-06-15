@@ -1,7 +1,0 @@
-<html>
-<body>
-    <h1>Support ${LLB}</h1>
-    <p>Contact your advisor ${YVES}.</p>
-    <a href="https://www.w3schools.com">__FOO_BAR__</a>
-</body>
-</html>
