@@ -1,0 +1,23 @@
+<html>
+<body>
+    <h1>Red Hat UBI9 Base Versions</h1>
+    <ul>
+     #for (version : versions)
+             <li>${version}</li>
+     #end for
+    </ul>
+
+    // dropdown & list
+    <option value="1">One</option>
+    <option value="2">Two</option>
+    <option value="3">Three</option>
+
+
+<select name="cars" id="cars" sandroContent="versions">
+-> html parser selecte && sandroContent -> option code pro wert in versions
+</select>
+
+    <br>
+    <a href="page1">Go to Page 1</a>
+</body>
+</html>

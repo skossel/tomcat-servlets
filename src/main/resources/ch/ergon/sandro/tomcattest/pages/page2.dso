@@ -1,0 +1,12 @@
+<html>
+<body>
+    <h1>Bank Account</h1>
+    <p>Informations for your account:</p>
+    <p>Bank: ${LLB}</p>
+    <p>Advisor: ${SANDRO}</p>
+    <bold>__FOO_BAR__</bold>
+    <p>Pfirsich: ${pfirsich}</p>
+    <br>
+    <a href="page3">Go to Page 3</a>
+</body>
+</html>
