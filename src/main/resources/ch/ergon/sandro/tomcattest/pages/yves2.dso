@@ -1,0 +1,8 @@
+<html>
+<body>
+    <h1>Yves Page 2</h1>
+    <p>Und hier ist die zweite Seite von Yves.</p>
+    <hr>
+    <p><a href="../path/page1">Weiter zu Page 1</a></p>
+</body>
+</html>

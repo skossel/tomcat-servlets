@@ -1,0 +1,13 @@
+<html>
+    <body>
+        <h1>Aktuelle Aktienkurse</h1>
+        <p>Hier finden Sie die neuesten Börsenkurse.</p>
+        <ul>
+            <li>Apple: 180 USD</li>
+            <li>Microsoft: 420 USD</li>
+            <li>Google: 150 USD</li>
+        </ul>
+        <hr>
+        <p><a href="../sandro/sandro1">Zurück zum Start (Sandro Page 1)</a></p>
+    </body>
+</html>
